@@ -380,7 +380,6 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
           }
         }
       }
-
       let childrenCount = node.getChildren().length
       for (const childNode of node.getChildren()) {
         if (pgn === childNode.data.pgn) {
@@ -414,7 +413,6 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
 
       return childrenCount
     }
-
     let root = required.data[0]
     if (!root || !handlers) return
 

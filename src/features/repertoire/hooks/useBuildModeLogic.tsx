@@ -251,7 +251,6 @@ export function useBuildModeLogic() {
     )
     transpositionIndex.current = index
     setLinesData(root)
-
     notifyRepertoireChange()
   }
 

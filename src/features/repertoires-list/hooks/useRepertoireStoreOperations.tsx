@@ -573,7 +573,6 @@ export function useRepertoireStoreOperations() {
 
     // Set the `repertoire.current` state to the `ChessRepertoire` object corresponding to the specified repertoire ID from the `repertoires` `Map` object
     repertoire.current = repertoires.get(String(repertoireId))
-
     if (
       repertoire.current.state.syncStatus === RepertoireSyncStatus.SYNC &&
       repFromObjectStore.state.timestamp !== repertoire.current.state.timestamp

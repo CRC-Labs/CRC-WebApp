@@ -52,7 +52,6 @@ export default function BoardProvider({ children }) {
       setBoardConfig(conf)
     }
   }
-
   const ref = React.useRef<HTMLDivElement>(null)
 
   const boardApi = React.useRef<Api | null>(null)
