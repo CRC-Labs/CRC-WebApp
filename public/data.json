@@ -1,0 +1,67 @@
+{
+ "name": "e4",
+ "color":"white",
+ "children": [
+  {
+   "name": "e5",
+   "color":"black",
+   "children": [
+    {
+     "name": "Nf3",
+     "color":"white",
+     "children": [
+      {
+       "name": "Nc6",
+       "color":"black",
+       "children": [
+        {
+         "name": "d4",
+         "value":1,
+         "color":"white",
+         "children": [
+           {
+            "name": "Bc6",
+            "color":"black",
+            "value":1
+           }
+          ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+    "name": "Nf6",
+    "color":"black",
+    "children": [
+     {
+      "name": "Nc3",
+      "value":1,
+      "color":"white",
+      "children": [
+        {
+         "name": "d5",
+         "color":"black",
+         "children": [
+          {
+           "name": "c4",
+           "value":1,
+           "color":"white",
+           "children": [
+             {
+              "name": "??",
+              "color":"black",
+              "value":1
+             }
+            ]
+          }
+         ]
+        }
+       ]
+     }
+    ]
+   }
+ ]
+}

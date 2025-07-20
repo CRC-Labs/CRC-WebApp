@@ -1,0 +1,72 @@
+@use "tailwindcss" as *;
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Breakpoints */
+  --breakpoint-xs: 330px;
+  --breakpoint-sm: 700px;
+
+  /* Couleurs */
+  --color-body: #0e141b;
+
+  /* Typographie */
+  --font-family-sans: "Inter", theme("fontFamily.sans");
+
+  /* Largeurs */
+  --width-main: calc(100% - 16rem);
+
+  /* Animations */
+  --animation-green: green 0.7s linear forwards;
+  --animation-red: red 0.7s linear forwards;
+  --animation-drawer-right: drawer-right 0.3s;
+  --animation-text: text 5s ease infinite;
+}
+
+@keyframes textShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* purgecss start ignore */
+.tooltip {
+  @apply invisible absolute;
+}
+
+.has-tooltip:hover .tooltip {
+  @apply visible z-50;
+}
+html {
+  @apply antialiased;
+}
+
+html.dark input:-webkit-autofill,
+html.dark textarea:-webkit-autofill,
+html.dark select:-webkit-autofill {
+  box-shadow: 0 0 0 1000px rgb(55 65 81) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px rgb(55 65 81) inset !important;
+  -webkit-text-fill-color: rgb(156 163 175) !important;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  box-shadow: 0 0 0 1000px rgb(209 213 219) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px rgb(209 213 219) inset !important;
+  -webkit-text-fill-color: rgb(107 114 128) !important;
+}
+
+input,
+textarea,
+button,
+select,
+div,
+a {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+

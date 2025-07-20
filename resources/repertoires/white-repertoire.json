@@ -1,0 +1,21 @@
+{
+  "id": "1",
+  "color": "w",
+  "startingPosition": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  "positions": [
+    {
+      "id": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "moves": [
+        {
+          "color": "w",
+          "from": "e2",
+          "to": "e4",
+          "flags": "b",
+          "piece": "p",
+          "san": "e4",
+          "nextFen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"
+        }
+      ]
+    }
+  ]
+}

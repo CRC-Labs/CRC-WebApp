@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@hookform/resolvers/*": ["node_modules/@hookform/resolvers/*"],
+      "@models/*": ["./src/types/*"],
+      "types/*": ["./src/types/*"]
+    },
+    "incremental": true
+  },
+  "exclude": ["node_modules", ".next", "out"],
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "__tests__/**/*"
+  ]
+}

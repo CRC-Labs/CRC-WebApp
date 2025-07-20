@@ -1,0 +1,110 @@
+{
+  "name": "crc-webapp",
+  "version": "0.3.0",
+  "description": "Modern frontend for building and memorizing chess opening repertoires with interactive visualizations",
+  "author": {
+    "name": "Jérémy Guillemot",
+    "email": "Jeremy@chess-repertoire-companion.com",
+    "url": "https://github.com/sufod"
+  },
+  "license": "GPL-3.0",
+  "homepage": "https://chess-repertoire-companion.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/crc-labs/crc-webapp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/crc-labs/crc-webapp/issues",
+    "email": "contact@chess-repertoire-companion.com"
+  },
+  "keywords": [
+    "chess",
+    "repertoire",
+    "chess-openings",
+    "chess-training",
+    "nextjs",
+    "typescript",
+    "chess-analysis",
+    "pgn",
+    "chess-board",
+    "sunburst-visualization"
+  ],
+  "main": "src/pages/index.tsx",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0",
+    "yarn": ">=1.22.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "type-check": "tsc --pretty --noEmit",
+    "format": "prettier --write .",
+    "lint": "eslint src --fix",
+    "test": "jest --no-cache",
+    "test-all": "yarn lint && yarn type-check && yarn test"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.12.8",
+    "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.2.0",
+    "@hookform/resolvers": "^3.10.0",
+    "@types/chess.js": "^0.13.4",
+    "@types/react-dom": "18.2.18",
+    "chess.js": "^0.13.4",
+    "chessground": "^9.1.1",
+    "classnames": "^2.5.1",
+    "cm-pgn": "github:shaack/cm-pgn",
+    "d3": "^7.9.0",
+    "framer-motion": "^12.0.6",
+    "graphql": "^16.10.0",
+    "lodash": "^4.17.21",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+    "react-hyper-tree": "^0.3.12",
+    "react-is": "^19.0.0",
+    "react-notifications-component": "^4.0.1",
+    "react-papaparse": "^4.1.0",
+    "sass": "^1.62.1",
+    "subscriptions-transport-ws": "^0.11.0",
+    "yup": "^1.6.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@tailwindcss/typography": "^0.5.16",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.12.0",
+    "@types/react": "^19.0.8",
+    "eslint": "^9.19.0",
+    "eslint-config-next": "^15.1.6",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-jest-dom": "^5.5.0",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-tailwindcss": "^3.18.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^30.0.0",
+    "module-alias": "^2.2.3",
+    "postcss": "^8.5.1",
+    "prettier": "^3.4.2",
+    "react-test-renderer": "^19.0.0",
+    "suneditor": "^2.47.3",
+    "suneditor-react": "^3.6.1",
+    "tailwindcss": "^4.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "yarn-upgrade-all": "^0.7.4"
+  }
+}
