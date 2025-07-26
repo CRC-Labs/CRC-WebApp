@@ -150,6 +150,9 @@ function RepertoireTrainer({ width, height }) {
   }
 
   useEffect(() => {
+    if (mode !== RepertoireMode.TRAIN) {
+      return
+    }
     if (minTrainingDepth > getTurnNumberFromChessHistory()) {
       computeTrainerState()
     } else if (quickTrainPosition.turn > minTrainingDepth) {
@@ -229,13 +232,18 @@ function RepertoireTrainer({ width, height }) {
 
   // Use an effect hook to set the configuration for the trainer when the smart move state variable changes
   useEffect(() => {
-    setConfig(boardConfig)
+    if (mode === RepertoireMode.TRAIN) {
+      setConfig(boardConfig)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [smartMove])
 
   // Use an effect hook to handle the trainer's moves and update the trainer state
   useEffect(() => {
     // document.addEventListener("touchstart", handleClick)
+    if (mode !== RepertoireMode.TRAIN) {
+      return
+    }
 
     // Get the history of moves from the chess object
     let h = chess.history({ verbose: true })

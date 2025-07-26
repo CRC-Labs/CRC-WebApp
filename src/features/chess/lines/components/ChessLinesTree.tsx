@@ -329,12 +329,6 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
       }, 50) // Small delay to ensure tree is ready
     }
   }, [repertoireVersion, prevRepertoireVersion, required.data, handlers, pgn])
-  // Update position tracking
-  useEffect(() => {
-    if (selectedLinePgn && selectedMoveIndex >= 0) {
-      setCurrentPositionState(selectedLinePgn, selectedMoveIndex)
-    }
-  }, [selectedLinePgn, selectedMoveIndex, setCurrentPositionState])
 
   // Handle changes in the PGN string and update the selected line and move index
   useEffect(() => {
@@ -342,11 +336,17 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
       setIsFound(false)
     }
     if (isFound || !required.data[0]) return
+
     function handleChildrenState(node): number {
       if (pgn === "") {
         setSelectedLinePgn("")
         setSelectedMoveIndex(0)
         setIsFound(true)
+        treeHandlers.trees.tree.handlers.setSelected(node, false)
+        for (const childNode of node.getChildren()) {
+          treeHandlers.trees.tree.handlers.setSelected(childNode, false)
+        }
+
         return 0
       }
 
@@ -427,6 +427,7 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
     }
 
     handleChildrenState(root)
+
     setState("loaded")
   }, [
     chess,
@@ -439,6 +440,13 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
     prevPgn,
     contextMenu,
   ])
+
+  // Update position tracking
+  useEffect(() => {
+    if (selectedLinePgn && selectedMoveIndex >= 0) {
+      setCurrentPositionState(selectedLinePgn, selectedMoveIndex)
+    }
+  }, [selectedLinePgn, selectedMoveIndex, setCurrentPositionState])
 
   useEffect(() => {
     let s = document.getElementById("search")

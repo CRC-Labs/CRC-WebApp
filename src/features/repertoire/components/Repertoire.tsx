@@ -44,13 +44,13 @@ export default function Repertoire() {
   // Get the current repertoire, repertoire loading function, and repertoire mode from the `useRepertoireManager` hook
   const { repertoire, mode } = useRepertoireProvider()
   const prevMode = useRef(mode)
-  const { updateBoard } = useBoardProvider()
+  const { updateBoard, setBoardConfig } = useBoardProvider()
   const { loadRepertoire } = useRepertoireStoreOperations()
   const { computeLines } = useRepertoireLinesLogic()
   const { loadingState, setLoadingState } = useAppContext()
 
   // Get the chess instance from the `useChessProvider` hook
-  const { chess } = useChessProvider()
+  const { chess, getConfigFromChess } = useChessProvider()
 
   // Get the current module and module setter from the `useAppContext` hook
   const { setModule } = useAppContext()

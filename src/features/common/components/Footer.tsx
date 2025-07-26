@@ -82,19 +82,18 @@ const Footer = () => {
         <div className="flex flex-col items-center">
           <p className="mt-8 text-xs text-gray-500 dark:text-gray-400">
             CRC is free/libre open source software. You can download, read, use
-            and modify every bit of source code. 
-            Download CRC source{" "}
-                <Link
-                  href="https://github.com/crc-labs/crc-webapp"
-                  className="font-semibold text-indigo-700 hover:underline dark:text-indigo-400"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  here
-                </Link>
+            and modify every bit of source code. Download CRC source{" "}
+            <Link
+              href="https://github.com/crc-labs/crc-webapp"
+              className="font-semibold text-indigo-700 hover:underline dark:text-indigo-400"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              here
+            </Link>
           </p>
           <Link
-            href="https://wiki.chess-repertoire-companion.com/en/changelog#h-024-sunday-february-11-2024"
+            href="https://wiki.chess-repertoire-companion.com/en/changelog"
             className="mt-2 text-xs font-semibold text-indigo-700 hover:underline dark:text-indigo-400"
             target="_blank"
             rel="noopener noreferrer"
