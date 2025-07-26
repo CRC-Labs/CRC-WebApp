@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Label, Radio, RadioGroup } from "@headlessui/react"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { useForm } from "react-hook-form"
@@ -45,6 +45,12 @@ function RepertoireCreation({
   const [progress, setProgress] = useState(0)
   const [progressMessage, setProgressMessage] = useState("")
 
+  // ✅ Add file handling state
+  const [isLoadingFile, setIsLoadingFile] = useState(false)
+  const [fileName, setFileName] = useState("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [titleSetFromFile, setTitleSetFromFile] = useState(false)
+
   const validationSchema = Yup.object().shape({
     title: Yup.string().optional(),
     pgn: Yup.string()
@@ -63,12 +69,79 @@ function RepertoireCreation({
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<Inputs>({
     mode: "onChange",
     resolver: yupResolver(validationSchema),
   })
   const hasErrors = Object.entries(errors).length !== 0
+
+  // ✅ Handle PGN file import
+  const handleFileImport = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const isValidFileType =
+      file.name.toLowerCase().endsWith(".pgn") || file.type === "text/plain"
+    if (!isValidFileType) {
+      alert("Please select a valid PGN file (.pgn)")
+      return
+    }
+
+    setIsLoadingFile(true)
+    setFileName(file.name)
+
+    try {
+      const text = await readFileAsText(file)
+      setValue("pgn", text, { shouldValidate: true })
+
+      // Update title if it's empty OR if it was previously set from a file
+      const currentTitle = watch("title")
+      if (!currentTitle || titleSetFromFile) {
+        const titleFromFile = file.name.replace(/\.pgn$/i, "")
+        setValue("title", titleFromFile)
+        setTitleSetFromFile(true)
+      }
+    } catch (error) {
+      console.error("Error reading file:", error)
+      alert("Error reading the PGN file. Please try again.")
+      setFileName("")
+    }
+
+    setIsLoadingFile(false)
+  }
+
+  const titleRegister = register("title", {
+    onChange: () => {
+      // If user manually types in title, mark as not from file
+      setTitleSetFromFile(false)
+    },
+  })
+
+  // ✅ File reader helper
+  const readFileAsText = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const text = e.target?.result as string
+        resolve(text)
+      }
+      reader.onerror = () => reject(reader.error)
+      reader.readAsText(file)
+    })
+  }
+
+  // ✅ Clear file selection
+  const handleClearFile = () => {
+    setFileName("")
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
 
   // ✅ Add proper type for data parameter
   function onSubmit(data: Inputs) {
@@ -297,7 +370,7 @@ function RepertoireCreation({
           />
         </div>
 
-        {/* PGN Input */}
+        {/* ✅ Enhanced PGN Input with File Import */}
         <div
           className={
             state === "processing" ? "opacity-50 pointer-events-none" : ""
@@ -306,6 +379,85 @@ function RepertoireCreation({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             PGN (optional)
           </label>
+
+          {/* ✅ File Import Section */}
+          <div className="mb-3">
+            <div className="flex gap-2 items-center">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pgn,text/plain"
+                onChange={handleFileImport}
+                disabled={state === "processing" || isLoadingFile}
+                className="hidden"
+              />
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={state === "processing" || isLoadingFile}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoadingFile ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    Import PGN File
+                  </>
+                )}
+              </button>
+
+              {fileName && !isLoadingFile && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-[150px]">
+                    {fileName}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleClearFile}
+                    className="text-red-500 hover:text-red-700 p-1"
+                    title="Clear file"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Upload a PGN file or paste PGN content below
+            </p>
+          </div>
+
+          {/* ✅ PGN Textarea (unchanged) */}
           <textarea
             {...register("pgn")}
             rows={4}
@@ -329,7 +481,7 @@ function RepertoireCreation({
 
               return base + " " + add
             })()}
-            placeholder="Enter a valid PGN or leave empty"
+            placeholder="Enter a valid PGN or use the import button above"
           />
           {errors.pgn && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">
