@@ -338,15 +338,18 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
     if (isFound || !required.data[0]) return
 
     function handleChildrenState(node): number {
+      function resetChildrenState(node) {
+        treeHandlers.trees.tree.handlers.setSelected(node, false)
+        for (const childNode of node.getChildren()) {
+          treeHandlers.trees.tree.handlers.setSelected(childNode, false)
+          resetChildrenState(childNode)
+        }
+      }
       if (pgn === "") {
         setSelectedLinePgn("")
         setSelectedMoveIndex(0)
         setIsFound(true)
-        treeHandlers.trees.tree.handlers.setSelected(node, false)
-        for (const childNode of node.getChildren()) {
-          treeHandlers.trees.tree.handlers.setSelected(childNode, false)
-        }
-
+        resetChildrenState(node)
         return 0
       }
 
