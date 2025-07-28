@@ -332,10 +332,17 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
 
   // Handle changes in the PGN string and update the selected line and move index
   useEffect(() => {
-    if (prevFilterValue !== titleFilterValue || prevPgn !== pgn) {
+    // ✅ Check if we need to reset isFound BEFORE the early return
+    const shouldResetFound =
+      prevFilterValue !== titleFilterValue || prevPgn !== pgn
+
+    if (shouldResetFound) {
       setIsFound(false)
     }
-    if (isFound || !required.data[0]) return
+
+    // ✅ Modified condition: don't return early if we just reset isFound OR if pgn is empty
+    if (!required.data[0]) return
+    if (isFound && !shouldResetFound && pgn !== "") return
 
     function handleChildrenState(node): number {
       function resetChildrenState(node) {
@@ -345,11 +352,18 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
           resetChildrenState(childNode)
         }
       }
+
       if (pgn === "") {
         setSelectedLinePgn("")
         setSelectedMoveIndex(0)
         setIsFound(true)
+        // ✅ Reset selections when going back to top
         resetChildrenState(node)
+        // ✅ Close all children
+        for (const childNode of node.getChildren()) {
+          childNode.setOpened(false)
+        }
+        node.options.childrenCount = node.getChildren().length
         return 0
       }
 
@@ -366,6 +380,7 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
           }
         }
       }
+
       let childrenCount = node.getChildren().length
       for (const childNode of node.getChildren()) {
         if (pgn === childNode.data.pgn) {
@@ -373,12 +388,10 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
           treeHandlers.trees.tree.handlers.setSelected(childNode, true)
           childNode.setOpened(true)
           setSelectedLinePgn(pgn)
-          // Also select the last move
           setSelectedMoveIndex(childNode.data.moveSequence.length - 1)
           setIsFound(true)
         } else if (pgn.includes(childNode.data.pgn)) {
-          // Not perfect match,
-          // one of children will be the selected line
+          // Not perfect match, one of children will be the selected line
           treeHandlers.trees.tree.handlers.setSelected(childNode, true)
           childNode.setOpened(true)
         } else {
@@ -401,16 +414,15 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
 
       return childrenCount
     }
+
     let root = required.data[0]
     if (!root || !handlers) return
 
     if (root.getChildren().length !== root.data.children.length) {
-      // Set the raw children if the node's children have changed
       handlers.setRawChildren(root, root.data.children, undefined, true)
     }
     refreshNodeChildren(root)
 
-    // Refresh the node's children recursively
     function refreshNodeChildren(node) {
       for (const childNode of node.children) {
         if (
@@ -430,7 +442,6 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
     }
 
     handleChildrenState(root)
-
     setState("loaded")
   }, [
     chess,

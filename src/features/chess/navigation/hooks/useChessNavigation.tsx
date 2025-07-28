@@ -12,7 +12,9 @@ export function useChessNavigation(repertoire: any) {
 
   const navigateToPreviousMove = useCallback(() => {
     chess.undo()
-    updateBoard()
+    setTimeout(() => {
+      updateBoard()
+    }, 0)
   }, [chess])
 
   const navigateToNextMove = useCallback(() => {
@@ -38,13 +40,17 @@ export function useChessNavigation(repertoire: any) {
     const nextMove = getNextMove(repertoire, chess)
     if (nextMove !== null) {
       chess.move(nextMove)
-      updateBoard()
+      setTimeout(() => {
+        updateBoard()
+      }, 0)
     }
   }, [chess, repertoire])
 
   const navigateToStart = useCallback(() => {
     chess.reset()
-    updateBoard()
+    setTimeout(() => {
+      updateBoard()
+    }, 0)
   }, [chess])
 
   return {

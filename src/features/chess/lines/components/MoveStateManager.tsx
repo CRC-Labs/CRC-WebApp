@@ -1,5 +1,5 @@
 // hooks/useMoveStateManager.js
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useChessProvider } from "../../logic/providers/ChessProvider"
 
 export const MOVE_STATES = {
@@ -15,6 +15,13 @@ export function useMoveStateManager() {
   const [searchHighlight, setSearchHighlight] = useState("")
   const [currentPosition, setCurrentPosition] = useState(null)
   const [pendingDeleteMove, setPendingDeleteMove] = useState(null)
+
+  // ✅ Add useEffect to handle the chess.pgn() === "" case
+  useEffect(() => {
+    if (currentPosition && chess.pgn() === "") {
+      setCurrentPosition(null)
+    }
+  }, [chess.pgn(), currentPosition])
 
   // Set a move as pending deletion (highlighted in red) - for BOTH delete and confirmation
   const setPendingDelete = useCallback((lineId, moveIndex, move) => {
@@ -36,7 +43,7 @@ export function useMoveStateManager() {
     setCurrentPosition({ linePgn, moveIndex })
   }, [])
 
-  // Get the state for a specific move
+  // ✅ Get the state for a specific move - PURE FUNCTION, NO STATE UPDATES
   const getMoveState = useCallback(
     (lineId, moveIndex, move) => {
       // Priority order: pending delete > current position > search highlight > normal
@@ -50,15 +57,12 @@ export function useMoveStateManager() {
         return MOVE_STATES.PENDING_DELETE
       }
 
-      // Check if this is the current position
+      // ✅ Check if this is the current position - NO STATE UPDATE
       if (
         currentPosition &&
         currentPosition.linePgn === lineId &&
         currentPosition.moveIndex === moveIndex
       ) {
-        if (chess.pgn() === "") {
-          setCurrentPosition(null)
-        }
         return MOVE_STATES.CURRENT_POSITION
       }
 
@@ -83,7 +87,7 @@ export function useMoveStateManager() {
         "border-lime-500 dark:border-lime-500 text-lime-500 dark:text-lime-500",
       [MOVE_STATES.HIGHLIGHTED]: "animate-bounce",
       [MOVE_STATES.PENDING_DELETE]:
-        "border-red-500 dark:border-red-500 border-2 animate-bounce", // Only border + animation
+        "border-red-500 dark:border-red-500 border-2 animate-bounce",
       [MOVE_STATES.CURRENT_POSITION]:
         "border-lime-500 dark:border-lime-400 text-lime-500 dark:text-lime-600",
     }
@@ -97,11 +101,9 @@ export function useMoveStateManager() {
     clearPendingDelete,
     setSearchHighlightText,
     setCurrentPositionState,
-
     // State getters
     getMoveState,
     getMoveClasses,
-
     // Current states
     pendingDeleteMove,
     searchHighlight,

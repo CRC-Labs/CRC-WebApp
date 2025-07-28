@@ -60,6 +60,15 @@ const BuildModeContainer = ({ width, height }) => {
     setShowExportModal(true)
   }
 
+  const handleBackToTop = () => {
+    chess.reset()
+    setBoardConfig(getConfigFromChess())
+    // ✅ Add a small delay to ensure tree reacts to the change
+    setTimeout(() => {
+      // This ensures the tree effect runs after the board state is updated
+    }, 50)
+  }
+
   // Check if the current repertoire color is black and the boardConfiguration orientation is white or not set
   useEffect(() => {
     adaptBoardOrientation(repertoire.current.color)
@@ -173,10 +182,7 @@ const BuildModeContainer = ({ width, height }) => {
               if (panel === 0 && getTurnNumberFromChessHistory() > 1)
                 return (
                   <div
-                    onClick={() => {
-                      chess.reset()
-                      setBoardConfig(getConfigFromChess())
-                    }}
+                    onClick={handleBackToTop}
                     style={{
                       width: width / 8,
                       height: height / 8,
