@@ -174,3 +174,7 @@ export function sanitizeFen(fen: string): string {
   if (fenParts.length === 3) return fen //Already sanitized
   return fenParts.slice(0, 3).join(" ")
 }
+
+export function isSanitizedFen(fen: string): boolean {
+  return fen.split(" ").length === 3
+}

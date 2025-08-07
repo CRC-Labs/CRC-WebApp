@@ -24,7 +24,7 @@ export function computeSunburstDataFromPosition(
   suggestions: ChessRepertoire,
   positionId: string,
   lastMove: ChessMove,
-  depth: number
+  depth: number,
 ): SunburstNode {
   let position: ChessPosition
   let suggestionMode = false
@@ -57,7 +57,7 @@ export function computeSunburstDataFromPosition(
       repertoire,
       suggestions,
       move.nextFen,
-      depth - 1
+      depth - 1,
     )
     if (data.children === null || data.children.length === 0) {
       // If the candidate has no children nodes, set its value to 1.
@@ -101,7 +101,7 @@ export function computeChildrenFromCandidates(
   repertoire: ChessRepertoire,
   suggestions: ChessRepertoire,
   positionId: string,
-  depth: number
+  depth: number,
 ): SunburstNode[] {
   if (depth < 0) {
     // If the depth is less than 0, return null.
@@ -121,7 +121,11 @@ export function computeChildrenFromCandidates(
     return null
   }
   let candidates = position.moves
-  if (candidates === undefined || candidates.size === 0) {
+  if (
+    candidates === undefined ||
+    candidates === null ||
+    candidates.size === 0
+  ) {
     // If the position has no candidates or suggested moves, return an empty array.
     return []
   }
@@ -135,7 +139,7 @@ export function computeChildrenFromCandidates(
         repertoire,
         suggestions,
         candidate.nextFen,
-        depth - 1
+        depth - 1,
       ),
     }
     if (candidateNode.children === null) {
@@ -160,7 +164,7 @@ export function getChessRepertoireFromObject(repertoire): ChessRepertoire {
     repertoire.id,
     repertoire.title,
     repertoire.color,
-    repertoire.startingPosition
+    repertoire.startingPosition,
   )
 
   // For each position in the object, create a `ChessPosition` instance and add it to the `positions` map of the `ChessRepertoire` instance.
@@ -186,7 +190,7 @@ export function getChessRepertoireFromObject(repertoire): ChessRepertoire {
  * @returns The `Map` of `ChessRepertoire` instances.
  */
 export function createRepertoireIndexFromRepertoireArray(
-  repertoires
+  repertoires,
 ): Map<string, ChessRepertoire> {
   let repertoireIndex = new Map<string, ChessRepertoire>()
   repertoires.forEach((repertoire) => {
@@ -205,13 +209,13 @@ export function createRepertoireIndexFromRepertoireArray(
  * @returns The `ChessRepertoire` instance.
  */
 export function createSuggestionsRepertoireFromSuggestionArray(
-  suggestionList
+  suggestionList,
 ): ChessRepertoire {
   let suggestionsRepertoire: ChessRepertoire = new ChessRepertoire(
     "lol",
     "suggestionsRepertoire",
     "w",
-    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   )
 
   // For each suggestion object, create a `ChessPosition` instance and add it to the `positions` map of the `ChessRepertoire` instance.

@@ -33,7 +33,6 @@ export function useBuildModeLogic() {
 
   const { openConflictModal } = useModals()
   const { setPromotionModalState } = useContext(PromotionModalContext)
-  const { navigateToNextMove } = useChessNavigation(repertoire)
 
   // Gestion d'un coup sélectionné dans le sunburst
   function handleSunburstSelection(move: ChessMove, parentMove?: ChessMove) {

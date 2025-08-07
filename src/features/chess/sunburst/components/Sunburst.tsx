@@ -272,6 +272,13 @@ const Sunburst = (props) => {
         clicked(d, newProps)
       })
 
+    // Add this helper function to calculate text width estimation
+    function estimateTextWidth(text: string, fontSize: number): number {
+      // Rough estimation: each character is approximately 0.6 * fontSize pixels wide
+      // Adjust this multiplier based on your font
+      return text.length * fontSize * 0.6
+    }
+
     // Create a new group element and append it to the `g` element
     const label = g
       .append("g")
@@ -283,19 +290,47 @@ const Sunburst = (props) => {
       .join("g")
       .attr("dy", "0.35em")
       .attr("class", (d) => {
-        // Set the size of the text based on whether the move includes "="
-        let size = "text-4xl"
+        // ✅ Dynamic font sizing based on text length and segment size
+        const segmentWidth = getSegmentWidth(d, radius)
+        const moveText =
+          d.data.move.san.startsWith("O-O") ||
+          !firstIsUppercase(d.data.move.san)
+            ? d.data.move.san
+            : d.data.move.san.slice(1)
+
+        let fontSize = 32 // Base size for text-4xl
+
+        // Special case for promotion moves
         if (d.data.move.san.includes("=")) {
-          size = "text-2xl"
+          fontSize = 24 // text-2xl
         }
-        // Set the class of the element based on the color of the move
+
+        // Calculate if text fits in segment
+        let estimatedWidth = estimateTextWidth(moveText, fontSize)
+
+        // If text is too wide, reduce font size
+        if (estimatedWidth > segmentWidth * 0.8) {
+          // Use 80% of available space
+          if (estimatedWidth > segmentWidth * 1.2) {
+            fontSize = 16 // text-xl
+          } else if (estimatedWidth > segmentWidth) {
+            fontSize = 20 // text-2xl
+          }
+        }
+
+        // Convert fontSize to Tailwind class
+        let sizeClass = "text-3xl"
+        if (fontSize <= 16) sizeClass = "text-xl"
+        else if (fontSize <= 20) sizeClass = "text-xl"
+        else if (fontSize <= 24) sizeClass = "text-2xl"
+
+        // Set the class based on move color
         if (d.data.move.color === "b") {
-          return "font-bold stroke-[#cccccc] " + size
+          return "font-bold stroke-[#cccccc] " + sizeClass
         }
-        return "font-bold stroke-[#333333] " + size
+        return "font-bold stroke-[#333333] " + sizeClass
       })
       .attr("fill", (d) => {
-        // Set the fill color of the element based on whether the move is a suggestion or the color of the move
         if (d.data.move.suggestion) {
           return "#65a30d"
         }
@@ -306,20 +341,11 @@ const Sunburst = (props) => {
       })
       .attr("fill-opacity", (d) => +labelVisible(d.current))
       .attr("transform", (d) => {
-        // Set the transform attribute of the element based on the move and the radius
-        if (
-          d.data.move.san === "O-O" ||
-          d.data.move.san === "O-O-O" ||
-          !firstIsUppercase(d.data.move.san)
-        ) {
-          return labelTransform(d, radius)
-        } else {
-          return labelTransform(d, radius, true)
-        }
+        // ✅ Enhanced label transform with text-aware positioning
+        return enhancedLabelTransform(d, radius)
       })
       .append("text")
       .text((d) => {
-        // Set the text of the element based on the move
         if (
           d.data.move.san.startsWith("O-O") ||
           !firstIsUppercase(d.data.move.san)
@@ -333,22 +359,22 @@ const Sunburst = (props) => {
         return this.parentNode
       })
       .filter(function (d) {
-        // Filter the elements based on the move
         if (
           !d.data.move.san.startsWith("O-O") &&
           firstIsUppercase(d.data.move.san)
-        )
+        ) {
           return true
+        }
         return false
       })
       .append("image")
       .attr("xlink:href", (d) => {
-        // Set the `xlink:href` attribute of the image element based on the move and the color
         return getPieceImagePathFromSan(d.data.move.san, d.data.move.color)
       })
       .attr("x", (d) => {
-        // Set the `x` attribute of the image element based on the length of the move
-        if (d.data.move.san.length >= "4") return "-80"
+        // ✅ Dynamic image positioning based on text length
+        const textLength = d.data.move.san.length
+        if (textLength >= 4) return "-80"
         return "-60"
       })
       .attr("y", "-40")
@@ -470,6 +496,14 @@ function labelVisible(d) {
   return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03
 }
 
+// Add this function to calculate available space in a segment
+function getSegmentWidth(d: any, radius: number): number {
+  const currentRadius = ((d.current.y0 + d.current.y1) / 2) * radius
+  const angularWidth = d.current.x1 - d.current.x0
+  // Calculate the arc length at the text radius
+  return currentRadius * angularWidth
+}
+
 /**
  * A function that transforms the label of a node in the sunburst chart.
  * The `labelTransform` function takes a node, radius, and withIcon boolean and returns a string representing the label transformation.
@@ -480,35 +514,59 @@ function labelVisible(d) {
  * @param withIcon A boolean indicating whether to adjust the label position based on the angle.
  * @returns A string representing the label transformation.
  */
-function labelTransform(node, radius, withIcon = false) {
+function enhancedLabelTransform(
+  node: any,
+  radius: number,
+  withIcon = false,
+): string {
   const d = node.current
   const angle = 90
   const x = (((d.x0 + d.x1) / 2) * 180) / Math.PI
-  const y = ((d.y0 + d.y1) / 2) * (radius - 5)
-  if (withIcon && x - angle === 180) {
-    // Adjust the label position based on the angle
-    return `rotate(${x - angle}) translate(${y - 15},0) rotate(${-x + angle})`
-  } else if (withIcon && x - angle === 0) {
-    // Adjust the label position based on the angle
-    return `rotate(${x - angle}) translate(${y + 15},0) rotate(${-x + angle})`
-  } else if (withIcon && x - angle === 90) {
-    // Adjust the label position based on the angle
-    return `rotate(${x - angle}) translate(${y},-15) rotate(${-x + angle})`
-  } else if (withIcon && x - angle >= 45 && x - angle <= 60) {
-    // Adjust the label position based on the angle
-    return `rotate(${x - angle}) translate(${y + 15},0) rotate(${-x + angle})`
-  } else if (withIcon && x - angle === 18) {
-    // Adjust the label position based on the angle
-    return `rotate(${x - angle}) translate(${y + 25},-15) rotate(${-x + angle})`
-  } else if (withIcon && x - angle > -90 && x - angle < 0) {
-    // Adjust the label position based on the angle
-    return `rotate(${x - angle}) translate(${y + 10},25) rotate(${-x + angle})`
-  } else if (withIcon && x - angle > 134 && x - angle < 135) {
-    // Adjust the label position based on the angle
-    return `rotate(${x - angle}) translate(${y},-20) rotate(${-x + angle})`
+  const baseY = ((d.y0 + d.y1) / 2) * (radius - 5)
+
+  const moveText =
+    node.data.move.san.startsWith("O-O") ||
+    !firstIsUppercase(node.data.move.san)
+      ? node.data.move.san
+      : node.data.move.san.slice(1)
+
+  const textLength = moveText.length
+  const normalizedAngle = (x - angle + 360) % 360
+
+  let adjustedY = baseY
+
+  // ✅ Step 1: Initial positioning logic
+  if (withIcon) {
+    if (normalizedAngle >= 90 && normalizedAngle <= 270) {
+      // LEFT SIDE: Move labels INWARD
+      adjustedY = baseY + Math.max(4, textLength * 1.5)
+    } else {
+      // RIGHT SIDE: Move labels OUTWARD
+      adjustedY = baseY + Math.max(15, textLength * 3) + 5
+    }
+  } else {
+    if (normalizedAngle >= 90 && normalizedAngle <= 270) {
+      // LEFT SIDE: Move labels INWARD
+      adjustedY = baseY + Math.max(2, textLength) - 13
+    } else {
+      // RIGHT SIDE: Move labels OUTWARD
+      adjustedY = baseY + Math.max(8, textLength * 2) + 13
+    }
   }
-  // Return the label transformation
-  return `rotate(${x - angle}) translate(${y},0) rotate(${-x + angle})`
+
+  // ✅ Step 2: Fine-tune by MODIFYING the existing adjustedY
+  if (normalizedAngle >= 160 && normalizedAngle <= 200) {
+    // Right side area - add extra outward push
+    adjustedY += 3 // ✅ ADD to existing position, don't replace
+  } else if (normalizedAngle >= 90 && normalizedAngle < 160) {
+    // Left side area - adjust for "Nbd7" and similar labels
+    adjustedY -= Math.max(2, textLength * 0.5) // ✅ SUBTRACT to move more inward
+  } else if (normalizedAngle >= 250 && normalizedAngle <= 290) {
+    // Bottom area - slight adjustment
+    adjustedY += 2 // ✅ ADD to existing position
+  }
+
+  return `rotate(${x - angle}) translate(${adjustedY},0) rotate(${-x + angle})`
 }
 
 function transitionTo(
@@ -607,7 +665,7 @@ function transitionTo(
     })
     .transition(t)
     .attr("fill-opacity", (d) => +labelVisible(d.target))
-    .attrTween("transform", (d) => () => labelTransform(d, radius))
+    .attrTween("transform", (d) => () => enhancedLabelTransform(d, radius))
 }
 
 /**

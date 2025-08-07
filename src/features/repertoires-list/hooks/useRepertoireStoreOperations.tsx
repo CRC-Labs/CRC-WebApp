@@ -1,6 +1,6 @@
 import { useRepertoireProvider } from "@/features/repertoire/providers/RepertoireProvider"
 
-import { sanitizeFen } from "@/features/common/utils/utils"
+import { isSanitizedFen, sanitizeFen } from "@/features/common/utils/utils"
 import { useApi } from "@/features/api/providers/ApiProvider"
 import { ApolloError } from "@apollo/client"
 import { Pgn } from "cm-pgn"
@@ -408,8 +408,10 @@ export function useRepertoireStoreOperations() {
             // Handle any errors that occur during the API call
             if (e.networkError) {
               // Handle network errors
+              console.error(e.message)
             } else if (e.graphQLErrors) {
               // Handle GraphQL errors
+              console.error(e.message)
               if (
                 e.message.startsWith("Error 401") ||
                 e.message.startsWith("Error 404") ||
@@ -434,20 +436,113 @@ export function useRepertoireStoreOperations() {
             // Handle any errors that occur during the API call
             if (e.networkError) {
               // Handle network errors
+              console.error(e.message)
             } else if (e.graphQLErrors) {
               // Handle GraphQL errors
               if (
+                e.message.startsWith(
+                  "Error 409: Conflict Error when updating repertoire position: unable to update an unregistered position",
+                )
+              ) {
+                //Special case for old repertoires
+                let create: ChessRepertoirePositionUpdate = {
+                  action: ChessRepertoirePositionUpdateAction.CREATE,
+                  id: position.id,
+                  moves: Array.from(position.moves.values()),
+                }
+                chessApi
+                  .updateRepertoirePositions(repertoire.id, [create])
+                  .then(() => {})
+                  .catch((e: ApolloError) => {
+                    console.error(e.message)
+                  })
+              } else if (
                 e.message.startsWith("Error 401") ||
                 e.message.startsWith("Error 404") ||
                 e.message.startsWith("Error 409")
               ) {
                 // Handle specific error codes
+                console.error(e.message)
               }
             }
           })
       }
     }
     updateRepertoireInObjectStore(repertoire)
+  }
+
+  function keepSanitizedPositionsOnly(
+    positions:
+      | ChessPosition[]
+      | Map<string, ChessPosition>
+      | { [id: string]: ChessPosition },
+  ): Map<string, ChessPosition> {
+    let posArray: ChessPosition[]
+
+    // Normalize input to array
+    if (Array.isArray(positions)) {
+      posArray = positions
+    } else if (
+      typeof (positions as Map<string, ChessPosition>).forEach === "function"
+    ) {
+      posArray = Array.from((positions as Map<string, ChessPosition>).values())
+    } else {
+      posArray = Object.values(positions)
+    }
+
+    const sanitizedKeys = new Set<string>()
+    for (const pos of posArray) {
+      if (isSanitizedFen(pos.id)) {
+        sanitizedKeys.add(pos.id)
+      }
+    }
+
+    const result = new Map<string, ChessPosition>()
+    for (const pos of posArray) {
+      let fenKey = isSanitizedFen(pos.id) ? pos.id : sanitizeFen(pos.id)
+
+      // If this is a sanitized FEN, or an only-legacy FEN (no sanitized present)
+      if (isSanitizedFen(pos.id) || !sanitizedKeys.has(fenKey)) {
+        // Always reconstruct moves as a Map
+        const movesMap = new Map<string, ChessMove>()
+        if (Array.isArray(pos.moves)) {
+          pos.moves.forEach((m: ChessMove) => {
+            m.nextFen = sanitizeFen(m.nextFen)
+            movesMap.set(m.san, m)
+          })
+        } else if (pos.moves && typeof pos.moves.forEach === "function") {
+          // If already a Map
+          pos.moves.forEach((m: ChessMove) => {
+            m.nextFen = sanitizeFen(m.nextFen)
+            movesMap.set(m.san, m)
+          })
+        } else if (pos.moves && typeof pos.moves === "object") {
+          // Just in case moves is a plain object (rare, but possible)
+          Object.values(pos.moves).forEach((m: ChessMove) => {
+            m.nextFen = sanitizeFen(m.nextFen)
+            movesMap.set(m.san, m)
+          })
+        }
+        // Create (or clone) the ChessPosition
+        let sanitizedPos: ChessPosition = isSanitizedFen(pos.id)
+          ? new ChessPosition(pos.id) // keep id
+          : new ChessPosition(sanitizeFen(pos.id))
+        sanitizedPos.moves = movesMap
+        // You might want to copy any additional fields from the original ChessPosition here
+
+        result.set(fenKey, sanitizedPos)
+        sanitizedKeys.add(fenKey) // In case we're adding it as a sanitized entry now
+      } else {
+        // Only reached if legacy and sanitized already present
+      }
+    }
+    return result
+  }
+
+  // Helper function (as discussed earlier)
+  function isSanitizedFen(fen: string): boolean {
+    // Adjust the threshold if your sanitized FEN uses 3 fields or 4 fields
+    return fen.split(" ").length <= 4
   }
 
   /**
@@ -478,6 +573,7 @@ export function useRepertoireStoreOperations() {
 
     // Set the `repertoire.current` state to the `ChessRepertoire` object corresponding to the specified repertoire ID from the `repertoires` `Map` object
     repertoire.current = repertoires.get(String(repertoireId))
+
     if (
       repertoire.current.state.syncStatus === RepertoireSyncStatus.SYNC &&
       repFromObjectStore.state.timestamp !== repertoire.current.state.timestamp
@@ -498,16 +594,10 @@ export function useRepertoireStoreOperations() {
           .then((result) => {
             // If the `readRepertoire` query is successful, update the current repertoire with the received data, set the sync status of the current repertoire to `SYNC`, save the current repertoire in the `repertoires` object store, compute the lines of the current repertoire, and resolve the promise with `true`
             let receivedRepertoire = result.data.readRepertoire
-            receivedRepertoire.positions.forEach((p) => {
-              let newPos: ChessPosition = new ChessPosition(sanitizeFen(p.id))
-              if (p.moves) {
-                p.moves.forEach((m: ChessMove) => {
-                  m.nextFen = sanitizeFen(m.nextFen)
-                  newPos.moves.set(m.san, m)
-                })
-              }
-              repertoire.current.positions.set(sanitizeFen(p.id), newPos)
-            })
+            repertoire.current.positions = keepSanitizedPositionsOnly(
+              receivedRepertoire.positions,
+            )
+
             repertoire.current.state.timestamp =
               receivedRepertoire.lastModification
             repertoire.current.state.syncStatus = RepertoireSyncStatus.SYNC
@@ -535,17 +625,10 @@ export function useRepertoireStoreOperations() {
       // If the user is not authenticated, the current repertoire is synchronized, or the current repertoire is a demo repertoire, set the `repertoire.current` state to the `ChessRepertoire` object corresponding to the specified repertoire ID from the `repertoiresFromObjectStore` state, compute the lines of the current repertoire, and resolve the promise with `true`
       return new Promise((resolve, reject) => {
         repertoire.current = repFromObjectStore
+        repertoire.current.positions = keepSanitizedPositionsOnly(
+          repFromObjectStore.positions,
+        )
 
-        repFromObjectStore.positions.forEach((p) => {
-          let newPos: ChessPosition = new ChessPosition(sanitizeFen(p.id))
-          if (p.moves) {
-            p.moves.forEach((m: ChessMove) => {
-              m.nextFen = sanitizeFen(m.nextFen)
-              newPos.moves.set(m.san, m)
-            })
-          }
-          repertoire.current.positions.set(sanitizeFen(p.id), newPos)
-        })
         resolve(true)
       })
     }
