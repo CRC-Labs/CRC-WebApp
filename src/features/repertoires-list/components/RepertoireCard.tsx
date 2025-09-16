@@ -3,11 +3,11 @@ import { useEffect, useState } from "react"
 import { CloudArrowUpIcon } from "@heroicons/react/20/solid"
 import dynamic from "next/dynamic"
 
-import { useApi } from "@/features/api/providers/ApiProvider"
 import { useAppContext } from "@/features/context/providers/AppContextProvider"
 import { Icon } from "@/features/common/utils/icons"
 import {
   ChessRepertoire,
+  RepertoireMode,
   RepertoireStateAction,
 } from "../../../types/Repertoire"
 import ConfirmDeleteRepertoireModal from "./ConfirmDeleteRepertoireModal"
@@ -38,7 +38,7 @@ function RepertoireCard({ repertoire }: { repertoire: ChessRepertoire }) {
 
   const [showQuickExportModal, setShowQuickExportModal] = useState(false)
   const [exportPgnContent, setExportPgnContent] = useState("")
-  const { repertoire: loadedRepertoire } = useRepertoireProvider()
+  const { repertoire: loadedRepertoire, setMode } = useRepertoireProvider()
 
   const downloadPgnFile = (pgn: string, filename: string) => {
     const blob = new Blob([pgn], { type: "text/plain" })
@@ -172,7 +172,8 @@ function RepertoireCard({ repertoire }: { repertoire: ChessRepertoire }) {
       <div
         onClick={(e) => {
           if (repertoire.state.action === RepertoireStateAction.IDLE) {
-            setRepertoireModule(repertoire.id, "builder")
+            setRepertoireModule(repertoire.id)
+            setMode(RepertoireMode.BUILD)
           } else if (isCardActionMenuOpen) {
             setIsCardActionMenuOpen(undefined)
           } else if (

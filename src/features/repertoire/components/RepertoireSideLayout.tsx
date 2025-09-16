@@ -8,6 +8,7 @@ import { Icon } from "@/features/common/utils/icons"
 import { RepertoireMode } from "../../../types/Repertoire"
 import { findOpeningNameForPgn } from "@/features/chess/logic/utils/openingsUtils"
 import { useAppContext } from "@/features/context/providers/AppContextProvider"
+import { useBoardProvider } from "@/features/chess/board/providers/BoardProvider"
 
 export default function RepertoireSideLayout({ children, pgn }) {
   const [width, height] = getWidthAndHeight()
@@ -19,6 +20,7 @@ export default function RepertoireSideLayout({ children, pgn }) {
   const { openings } = useAppContext() // Accessing openings data from the AppContextProvider.
 
   const [opening, setOpening] = useState(findOpeningNameForPgn(pgn, openings))
+  const { updateBoard } = useBoardProvider()
 
   const fontSize = width / 28 > 23 ? 23 : width / 28
 
@@ -119,6 +121,7 @@ export default function RepertoireSideLayout({ children, pgn }) {
                   "pointer-events-auto top-0 left-0 flex cursor-pointer items-center justify-center rounded-bl-xl border-r border-gray-400 bg-zinc-300 shadow-md hover:bg-zinc-400 dark:border-gray-500 dark:bg-zinc-700 dark:hover:bg-zinc-600",
                   () => {
                     setMode(RepertoireMode.BUILD)
+                    updateBoard()
                   },
                 )}
                 {tabSelector(

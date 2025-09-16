@@ -50,7 +50,7 @@ const modulesNames = {
 interface AppContextInterface {
   module: Modules // Current active module
   setModule: Dispatch<SetStateAction<Modules>> // Function to set the active module
-  setRepertoireModule: (rid: string, mode: string) => void // Function to set the Repertoire module
+  setRepertoireModule: (rid: string) => void // Function to set the Repertoire module
   isSettingsModalOpen: boolean // Flag to determine if settings modal is open
   setIsSettingsModalOpen: Dispatch<SetStateAction<boolean>> // Function to toggle settings modal
   openings: Map<string, string> // Map containing opening data

@@ -1,6 +1,6 @@
 import { useRepertoireProvider } from "@/features/repertoire/providers/RepertoireProvider"
 
-import { isSanitizedFen, sanitizeFen } from "@/features/common/utils/utils"
+import { sanitizeFen } from "@/features/common/utils/utils"
 import { useApi } from "@/features/api/providers/ApiProvider"
 import { ApolloError } from "@apollo/client"
 import { Pgn } from "cm-pgn"

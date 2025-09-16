@@ -5,12 +5,14 @@ import { Chessground as ChessgroundApi } from "chessground"
 import { useBoardProvider } from "../providers/BoardProvider"
 import PromotionModal from "./PromotionModal"
 import { PromotionModalContext } from "../providers/PromotionModalProvider"
+import { useRepertoireProvider } from "@/features/repertoire/providers/RepertoireProvider"
 
 function Board({ config, afterMoveFunc }) {
   const { ref, boardApi } = useBoardProvider()
   const { promotionModalState, setPromotionModalState } = useContext(
     PromotionModalContext,
   )
+  const { mode } = useRepertoireProvider()
 
   useEffect(() => {
     if (ref?.current && config) {
@@ -25,8 +27,7 @@ function Board({ config, afterMoveFunc }) {
         if (boardApi.current) {
           try {
             boardApi.current.destroy()
-          } catch (e) {
-          }
+          } catch (e) {}
           boardApi.current = null
         }
 
@@ -41,7 +42,7 @@ function Board({ config, afterMoveFunc }) {
         boardApi.current.set(config)
       }
     }
-  }, [ref, config])
+  }, [ref, config, mode])
 
   useEffect(() => {
     boardApi.current?.set({

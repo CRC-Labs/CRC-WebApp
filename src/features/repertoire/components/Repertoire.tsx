@@ -68,32 +68,17 @@ export default function Repertoire() {
   const router = useRouter()
   const { authenticationState } = useAuthenticationState()
 
-  useEffect(() => {
-    if (prevMode.current !== mode && prevMode.current !== null) {
-      setTimeout(() => {
-        if (updateBoard) {
-          updateBoard()
-        }
-      }, 100)
-    }
-    prevMode.current = mode
-  }, [mode, updateBoard])
-
-  useEffect(() => {
-    window.addEventListener("resize", updateFlexDirection)
-    if (window.screen.orientation) {
-      window.screen.orientation.addEventListener("change", updateFlexDirection)
-    }
-    return () => {
-      window.removeEventListener("resize", updateFlexDirection)
-      if (window.screen.orientation) {
-        window.screen.orientation.removeEventListener(
-          "change",
-          updateFlexDirection,
-        )
-      }
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (prevMode.current !== mode && prevMode.current !== null) {
+  //     setTimeout(() => {
+  //       if (updateBoard) {
+  //         console.log("update board " + mode)
+  //         updateBoard()
+  //       }
+  //     }, 100)
+  //   }
+  //   prevMode.current = mode
+  // }, [mode, updateBoard])
 
   useEffect(() => {
     window.addEventListener("resize", updateFlexDirection)

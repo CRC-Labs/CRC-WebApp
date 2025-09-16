@@ -28,8 +28,7 @@ const panels = [
 // Define the RepertoireBuilder component
 const BuildModeContainer = ({ width, height }) => {
   const { loadPgn, handleBoardMove } = useBuildModeLogic()
-  const { repertoire, repertoireVersion, transpositionIndex } =
-    useRepertoireProvider()
+  const { repertoire, repertoireVersion } = useRepertoireProvider()
   const { linesData } = useRepertoireLinesLogic()
   // Get the chess instance and boardConfiguration from the chess provider
   const { chess, getConfigFromChess, getTurnNumberFromChessHistory } =

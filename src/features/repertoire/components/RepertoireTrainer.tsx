@@ -266,61 +266,65 @@ function RepertoireTrainer({ width, height }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Check if the current color in the repertoire is black and the configuration orientation is white or not defined
-  if (
-    repertoire.current.color === "b" &&
-    (boardConfig.orientation === "white" || !boardConfig.orientation)
-  ) {
-    // Create a new configuration object with the viewOnly and drawable properties set to false and the orientation property set to black
-    let conf = getConfigFromChess(
-      false,
-      boardConfig.viewOnly,
-      boardConfig.drawable,
-    )
-    conf.orientation = "black"
+  useEffect(() => {
+    // Check if the current color in the repertoire is black and the configuration orientation is white or not defined
+    if (
+      repertoire.current.color === "b" &&
+      (boardConfig.orientation === "white" || !boardConfig.orientation)
+    ) {
+      // Create a new configuration object with the viewOnly and drawable properties set to false and the orientation property set to black
+      let conf = getConfigFromChess(
+        false,
+        boardConfig.viewOnly,
+        boardConfig.drawable,
+      )
+      conf.orientation = "black"
 
-    // If smart move is not initialized, set the configuration using the `setConfig` function and set the smart move initialization state variable to true
-    if (!smInit) {
-      setConfig(conf)
-      setSmInit(true)
-    } else {
-      // If smart move is initialized, set the configuration using the `setBoardConfig` function
-      setBoardConfig(conf)
+      // If smart move is not initialized, set the configuration using the `setConfig` function and set the smart move initialization state variable to true
+      if (!smInit) {
+        setConfig(conf)
+        setSmInit(true)
+      } else {
+        // If smart move is initialized, set the configuration using the `setBoardConfig` function
+        setBoardConfig(conf)
+      }
+    } else if (
+      // Check if the current color in the repertoire is white and the configuration orientation is black
+      repertoire.current.color === "w" &&
+      boardConfig.orientation === "black"
+    ) {
+      // Create a new configuration object with the viewOnly and drawable properties set to false and the orientation property set to white
+      let conf = getConfigFromChess(
+        false,
+        boardConfig.viewOnly,
+        boardConfig.drawable,
+      )
+      conf.orientation = "white"
+
+      // If smart move is not initialized, set the configuration using the `setConfig` function and set the smart move initialization state variable to true
+      if (!smInit) {
+        setConfig(conf)
+        setSmInit(true)
+      } else {
+        // If smart move is initialized, set the configuration using the `setBoardConfig` function
+        setBoardConfig(conf)
+      }
     }
-  } else if (
-    // Check if the current color in the repertoire is white and the configuration orientation is black
-    repertoire.current.color === "w" &&
-    boardConfig.orientation === "black"
-  ) {
-    // Create a new configuration object with the viewOnly and drawable properties set to false and the orientation property set to white
-    let conf = getConfigFromChess(
-      false,
-      boardConfig.viewOnly,
-      boardConfig.drawable,
-    )
-    conf.orientation = "white"
+  }, [])
 
-    // If smart move is not initialized, set the configuration using the `setConfig` function and set the smart move initialization state variable to true
-    if (!smInit) {
-      setConfig(conf)
-      setSmInit(true)
-    } else {
-      // If smart move is initialized, set the configuration using the `setBoardConfig` function
-      setBoardConfig(conf)
+  useEffect(() => {
+    // Check the trainer state and update the configuration accordingly
+    if (trainerState === "success" && boardConfig.viewOnly === false) {
+      // If the trainer state is "success" and viewOnly is false, set the configuration to viewOnly and drawable to true
+      setBoardConfig(getConfigFromChess(true, true))
+    } else if (trainerState === "playing" && boardConfig.viewOnly) {
+      // If the trainer state is "playing" and viewOnly is true, set the configuration to viewOnly to false and drawable to false
+      setBoardConfig(getConfigFromChess(true, false))
+    } else if (trainerState === "error" && boardConfig.viewOnly === false) {
+      // If the trainer state is "error" and viewOnly is false, set the configuration to viewOnly to false and drawable to true
+      setBoardConfig(getConfigFromChess(false, true, boardConfig.drawable))
     }
-  }
-
-  // Check the trainer state and update the configuration accordingly
-  if (trainerState === "success" && boardConfig.viewOnly === false) {
-    // If the trainer state is "success" and viewOnly is false, set the configuration to viewOnly and drawable to true
-    setBoardConfig(getConfigFromChess(true, true))
-  } else if (trainerState === "playing" && boardConfig.viewOnly) {
-    // If the trainer state is "playing" and viewOnly is true, set the configuration to viewOnly to false and drawable to false
-    setBoardConfig(getConfigFromChess(true, false))
-  } else if (trainerState === "error" && boardConfig.viewOnly === false) {
-    // If the trainer state is "error" and viewOnly is false, set the configuration to viewOnly to false and drawable to true
-    setBoardConfig(getConfigFromChess(false, true, boardConfig.drawable))
-  }
+  }, [trainerState])
 
   function refreshConfWithSmartMove(conf) {
     // Create a copy of the configuration object
@@ -634,7 +638,7 @@ function RepertoireTrainer({ width, height }) {
   }
 
   function setSuccessIfNoMoreMovesToPlayOrReturnMoves() {
-    let mNumber = calculateMoveNumberFromCurrentPosition(getFen())
+    let mNumber = calculateMoveNumberFromCurrentPosition(chess.fen())
 
     // If the move number is greater than or equal to the maximum training depth, set the trainer state to "success" and return false
     if (mNumber >= localStorage.maxTrainingDepth) {
@@ -839,8 +843,9 @@ function RepertoireTrainer({ width, height }) {
     // Get the history of the moves made on the chess board
     h = chess.history({ verbose: true })
 
-    // If the current position is not in the repertoire, set the trainer state to "success"
-    if (!repertoire.current.positions.has(getFen())) {
+    // If the current position is not in the repertoire or has no next moves, set the trainer state to "success"
+    let pos = repertoire.current.positions.get(getFen())
+    if (!pos || pos.moves.size === 0) {
       setTrainerState("success")
       setInfoMessage(
         "Your repertoire doesn't have a response after opponent's last move, you should certainly add an appropriate move to play in this position !",
@@ -1179,7 +1184,7 @@ function RepertoireTrainer({ width, height }) {
                         Unfinished Line
                       </div>
                     </div>
-                    <div className="flex w-full flex-col items-center justify-center rounded-xl bg-zinc-300/80 px-8 pb-2 text-orange-700/90 shadow-inner dark:border-zinc-800 dark:bg-zinc-300/80">
+                    <div className="flex w-full flex-col items-center justify-center bg-zinc-300/80 px-8 pb-2 text-orange-700/90 shadow-inner dark:border-zinc-800 dark:bg-zinc-300/80">
                       <p
                         style={{
                           marginTop: height / 18,
