@@ -14,6 +14,7 @@ import { PortalContextMenu } from "./PortalContextMenu"
 interface TreeNodeProps {
   node: any // Remplacez 'any' par le type réel de votre nœud
   onToggle: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+  opened: boolean
   contextMenu: any // Remplacez 'any' par le type réel de votre menu contextuel
   setContextMenu: React.Dispatch<any> // Remplacez 'any' par le type réel de votre fonction setContextMenu
   loadPgn: (pgn: string) => void // Remplacez 'string' et 'void' par les types réels de votre fonction loadPgn
@@ -228,7 +229,8 @@ const MemoizedTreeNode = React.memo<TreeNodeProps>(
       prevProps.contextMenu === nextProps.contextMenu &&
       prevProps.selectedLinePgn === nextProps.selectedLinePgn &&
       prevProps.selectedMoveIndex === nextProps.selectedMoveIndex &&
-      prevProps.titleFilterValue === nextProps.titleFilterValue
+      prevProps.titleFilterValue === nextProps.titleFilterValue &&
+      prevProps.opened === nextProps.opened
     )
   },
 )
@@ -256,8 +258,7 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
 
   // Hooks
   const { chess, getFen } = useChessProvider()
-  const { linesData, repertoireVersion, transpositionIndex } =
-    useRepertoireProvider()
+  const { linesData, repertoireVersion } = useRepertoireProvider()
   const prevRepertoireVersion = usePrevious(repertoireVersion)
   const { required, handlers } = useTreeState({
     id: "tree",
@@ -492,6 +493,7 @@ const ChessLinesTreeContent = ({ pgn, loadPgn }) => {
           key={node.data.id}
           node={node}
           onToggle={onToggle}
+          opened={node.options.opened}
           contextMenu={contextMenu}
           setContextMenu={setContextMenu}
           loadPgn={loadPgn}
