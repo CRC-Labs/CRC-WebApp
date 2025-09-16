@@ -98,7 +98,7 @@ const Footer = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            CRC v0.3.0
+            CRC v0.3.1
           </Link>
           <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
             © 2025 Chess Repertoire Companion
