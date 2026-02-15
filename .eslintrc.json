@@ -3,7 +3,6 @@
   "extends": [
     "next/core-web-vitals",
     "plugin:jest-dom/recommended",
-    "plugin:tailwindcss/recommended",
     "plugin:prettier/recommended"
   ],
   "env": {
