@@ -150,7 +150,7 @@ export default function Donate() {
               Current Balance
             </p>
             <div className="text-4xl font-bold text-red-600 dark:text-red-400">
-              -$1295
+              -$1550
             </div>
             <p className="text-sm text-red-600 dark:text-red-400 mt-1">
               We need your help to get back to positive!
@@ -164,7 +164,7 @@ export default function Donate() {
                 Total Income
               </p>
               <p className="text-xl font-semibold text-green-600 dark:text-green-400">
-                $205
+                $250
               </p>
             </div>
             <div className="flex flex-col">
@@ -172,11 +172,23 @@ export default function Donate() {
                 Total Expenses
               </p>
               <p className="text-xl font-semibold text-red-600 dark:text-red-400">
-                $1,500
+                $1,800
               </p>
             </div>
           </div>
         </div>
+
+        <Link
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center"
+          href="https://docs.google.com/spreadsheets/d/1dWlwU2cIzq1ti20i6P2nDHjHt-7qgx-fzfSK00y_7Jk/edit?gid=419427895"
+        >
+          <div className="flex w-full items-center rounded-xl px-8 py-2 font-medium text-indigo-400 transition-colors duration-300">
+            <Icon className="h-14 w-14 pr-6" name="Eye" />
+            <p>Annual budget 2026 Spreadsheet</p>
+          </div>
+        </Link>
 
         <Link
           target="_blank"

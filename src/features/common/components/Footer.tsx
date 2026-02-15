@@ -101,7 +101,7 @@ const Footer = () => {
             CRC v0.3.1
           </Link>
           <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-            © 2025 Chess Repertoire Companion
+            © 2026 Chess Repertoire Companion
           </p>
         </div>
       </div>
